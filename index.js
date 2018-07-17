@@ -3,7 +3,7 @@
 const net = require('net')
 const logger = require('./helpers/logger.js').getLogger('index')
 
-const PORT = 3389
+const PORT = process.env.PORT || 3389
 const server = net.createServer()
 
 const heart = require('./protocol/heart.js')
@@ -11,7 +11,6 @@ const heart = require('./protocol/heart.js')
 server.on('connection', function (socket) {
   // 从连接中读取数据
   socket.on('data', function (data) {
-    logger.debug('原始数据', data)
     logger.debug('接收的数据 hex:', data.toString('hex'))
     const res = heart(data)
     socket.write(res)
@@ -35,9 +34,6 @@ server.listen(PORT, () => {
     server.getConnections((err, count) => {
       if (err) {
         return logger.error(err.message)
-      }
-      if (count > 0) {
-        logger.debug('连接数量', count)
       }
     })
   }, 2000)

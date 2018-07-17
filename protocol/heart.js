@@ -25,7 +25,7 @@ MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
 MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
 // MachineType[MachineType["MachineTypeTurnover"] = 3] = "MachineTypeTurnover";
 
-module.exports = function buildHeartReply (rawBuffer) {
+module.exports = function heartHandler (rawBuffer) {
   let beginSign = rawBuffer.readUInt16BE(0)// 头
   let machineId = rawBuffer.toString('ascii', 2, 18)// 设备id
   let random = rawBuffer.readUInt32LE(18)// 随机值
@@ -36,7 +36,7 @@ module.exports = function buildHeartReply (rawBuffer) {
   let mobileData = rawBuffer.readUInt8(29)// 移动数据强度
   let flag = rawBuffer.readUInt8(30)// 发送标志 0-wifi 1-移动数据
   let frameType = rawBuffer.readUInt8(31)// 帧类型 0-心跳 1-命令
-  logger.debug('帧类型', frameType)
+  logger.debug(`收到设备${machineId}帧类型`, frameType)
 
   if (frameType === 1) return
 
@@ -67,8 +67,7 @@ module.exports = function buildHeartReply (rawBuffer) {
   HashFunc = HashFunc.update(clcData).digest()
 
   HashFunc.copy(resBuffer, 32)
-  logger.debug('心跳报文', resBuffer)
-  logger.debug('心跳报文', resBuffer.length)
-  logger.debug('res hex', resBuffer.toString('hex'))
+
+  logger.debug('回复 心跳报文 hex串', resBuffer.toString('hex'))
   return resBuffer
 }
