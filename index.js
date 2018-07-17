@@ -13,7 +13,8 @@ server.on('connection', function (socket) {
   socket.on('data', function (data) {
     logger.debug('原始数据', data)
     logger.debug('接收的数据 hex:', data.toString('hex'))
-    heart(data)
+    const res = heart(data)
+    socket.write(res)
   })
   // 删除被关闭的连接
   socket.on('close', function () {

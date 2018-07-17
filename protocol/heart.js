@@ -71,4 +71,5 @@ module.exports = function buildHeartReply (rawBuffer) {
   HashFunc.update(clcData)
   HashFunc.digest().copy(resBuffer, 32)
   logger.debug('心跳报文', resBuffer)
+  return resBuffer
 }
