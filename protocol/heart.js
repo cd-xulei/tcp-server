@@ -27,7 +27,7 @@ let MachineType
   // MachineType[MachineType["MachineTypeTurnover"] = 3] = "MachineTypeTurnover";
 })(MachineType || (MachineType = {}))
 
-function buildHeartReply (rawBuffer) {
+module.exports = function buildHeartReply (rawBuffer) {
   let beginSign = rawBuffer.readUInt16BE(0)// 头
   let machineId = rawBuffer.toString('ascii', 2, 18)// 设备id
   console.log(machineId)
@@ -46,11 +46,15 @@ function buildHeartReply (rawBuffer) {
 
   const nowTime = ~~(Date.now() / 1000)
   const mType = MachineType.MachineTypeNormal
-  const resBuffer = Buffer.from(64)
+  const resBuffer = Buffer.alloc(64)
   resBuffer.writeUInt16LE(0x55AA, 0) // 头
   resBuffer.write(machineId, 2, 16, 'ascii')// 机器id
   resBuffer.writeUInt32LE(random, 18)// 随机码
   resBuffer.writeUInt32LE(nowTime, 22)// 当前时间
+
+  let activitedTimeStr = null
+  let activitedTime = activitedTimeStr == null ? 0 : Number(activitedTimeStr)
+
   if (mType === MachineType.MachineTypeDirect) {
     resBuffer.writeUInt32LE(nowTime + 300, 26)
   } else {
