@@ -4,19 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "build": "webpack"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cd-xulei/tcp-server.git"
+    "type": "git"
   },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/cd-xulei/tcp-server/issues"
-  },
-  "homepage": "https://github.com/cd-xulei/tcp-server#readme",
+  "bugs": {},
   "dependencies": {
     "log4js": "^3.0.0"
+  },
+  "devDependencies": {
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.16.1",
+    "webpack-cli": "^3.0.8"
   }
 }
