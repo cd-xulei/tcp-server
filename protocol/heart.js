@@ -20,19 +20,15 @@ const fixVal = Buffer.from([
   0x01, 0x23, 0x00, 0x00
 ])
 
-let MachineType
-(function (MachineType) {
-  MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
-  MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
-  // MachineType[MachineType["MachineTypeTurnover"] = 3] = "MachineTypeTurnover";
-})(MachineType || (MachineType = {}))
+let MachineType = {}
+MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
+MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
+// MachineType[MachineType["MachineTypeTurnover"] = 3] = "MachineTypeTurnover";
 
 module.exports = function buildHeartReply (rawBuffer) {
   let beginSign = rawBuffer.readUInt16BE(0)// 头
   let machineId = rawBuffer.toString('ascii', 2, 18)// 设备id
-  console.log(machineId)
   let random = rawBuffer.readUInt32LE(18)// 随机值
-  console.log(random)
   let version = rawBuffer.toString('hex', 22, 26)// 固定版本
 
   let Speed = rawBuffer.readUInt16BE(26)// 风机转速
@@ -55,7 +51,7 @@ module.exports = function buildHeartReply (rawBuffer) {
   let activitedTimeStr = null
   let activitedTime = activitedTimeStr == null ? 0 : Number(activitedTimeStr)
 
-  if (mType === MachineType.MachineTypeDirect) {
+  if (mType === MachineType.MachineTypeNormal) {
     resBuffer.writeUInt32LE(nowTime + 300, 26)
   } else {
     resBuffer.writeUInt32LE(activitedTime, 26)
@@ -68,8 +64,11 @@ module.exports = function buildHeartReply (rawBuffer) {
   resBuffer.copy(clcData, 32, 0, 32)
   fixVal.copy(clcData, 64)
   let HashFunc = crypto.createHash('sha256')
-  HashFunc.update(clcData)
-  HashFunc.digest().copy(resBuffer, 32)
+  HashFunc = HashFunc.update(clcData).digest()
+
+  HashFunc.copy(resBuffer, 32)
   logger.debug('心跳报文', resBuffer)
+  logger.debug('心跳报文', resBuffer.length)
+  logger.debug('res hex', resBuffer.toString('hex'))
   return resBuffer
 }
