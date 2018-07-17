@@ -35,10 +35,10 @@ module.exports = {
     minimizer: [
       new UglifyJsPlugin({
         uglifyOptions: {
-          mangle: false,
+          mangle: true,
           output: {
             comments: false,
-            beautify: true
+            beautify: false
           },
           compress: {
             warnings: false,
