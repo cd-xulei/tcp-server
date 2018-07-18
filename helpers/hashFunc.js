@@ -15,11 +15,16 @@ const fixVal = Buffer.from([
   0x01, 0x23, 0x00, 0x00
 ])
 
-module.exports = function (resBuffer) {
-  const len = pwdBuffer.length + fixVal.length + resBuffer.length
-  const clcBuffer = Buffer.concat([pwdBuffer, resBuffer, fixVal], len)
+module.exports = function (raw) {
+  const len = pwdBuffer.length + fixVal.length + raw.length
+  const clcBuffer = Buffer.concat([pwdBuffer, raw, fixVal], len)
 
   const hashFunc = crypto.createHash('sha256')
   const hashBuffer = hashFunc.update(clcBuffer).digest()
-  return hashBuffer
+
+  const resLen = hashBuffer.length + raw.length
+
+  const resBuffer = Buffer.concat([raw, hashBuffer], resLen)
+
+  return resBuffer
 }

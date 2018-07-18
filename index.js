@@ -38,7 +38,8 @@ server.on('close', function () {
 })
 
 server.listen(PORT, () => {
-  logger.debug(`tcp server listening on ${PORT}`)
+  const address = server.address()
+  logger.debug(`tcp server listening on ${address.port}`)
   setInterval(() => {
     server.getConnections((err, count) => {
       if (err) {
