@@ -8,7 +8,7 @@ const logger = require('../helpers/logger.js').getLogger('heart')
 const hashFunc = require('../helpers/hashFunc.js')
 
 const redisCli = require('../helpers/redis.js')
-
+const _ = require('lodash')
 // 设备的三种状态
 let MachineType = {}
 MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
@@ -25,21 +25,39 @@ module.exports = async function heartHandler (rawBuffer) {
   let wifi = rawBuffer.readUInt8(28)// wifi强度
   let mobileData = rawBuffer.readUInt8(29)// 移动数据强度
   let flag = rawBuffer.readUInt8(30)// 发送标志 0-wifi 1-移动数据
+  if (flag === 0) {
+    logger.debug('信号方式', 'wifi')
+    logger.debug('wifi信号强度', wifi)
+  }
+  if (flag === 1) {
+    logger.debug('信号方式', 'gprs')
+    logger.debug('gprs信号强度', mobileData)
+  }
+
   let frameType = rawBuffer.readUInt8(31)// 帧类型 0-心跳 1-命令
   logger.debug(`收到设备${machineId}帧类型`, frameType)
 
+  let mType = MachineType.MachineTypeNormal
   const stateStr = await redisCli.get(`${machineId}_state`)
+  logger.debug(`${machineId}_state is`, stateStr)
   if (stateStr) {
     let mState
     try {
       mState = JSON.parse(stateStr)
     } catch (e) {
-      mState = {}
+      mState = null
+    }
+    if (!_.isEmpty(mState)) {
+      if (mState.mode === 2 || mState.mode === 3) {
+        mType = MachineType.MachineTypeDirect
+      }
     }
     if (flag === 0) {
       mState.wifi = wifi
+      mState.mobile = 0
     }
     if (flag === 1) {
+      mState.wifi = 0
       mState.mobile = mobileData
     }
     mState.speed = speed
@@ -50,7 +68,6 @@ module.exports = async function heartHandler (rawBuffer) {
   if (frameType === 1) return null
 
   const nowTime = ~~(Date.now() / 1000)
-  const mType = MachineType.MachineTypeNormal
 
   let resBuffer = Buffer.alloc(32)
   resBuffer.writeUInt16LE(0x55AA, 0) // 头
@@ -96,7 +113,7 @@ module.exports = async function heartHandler (rawBuffer) {
 
   // 加上校验
   resBuffer = hashFunc(resBuffer)
-  logger.debug('回复 心跳报文 hex串', resBuffer.toString('hex'))
+  logger.debug('回复心跳 hex串', resBuffer.toString('hex'))
   return {
     resBuffer,
     machineId,
