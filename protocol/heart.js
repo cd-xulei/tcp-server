@@ -16,6 +16,7 @@ MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
 MachineType[MachineType['MachineTypeTurnover'] = 3] = 'MachineTypeTurnover'
 
 module.exports = async function heartHandler (rawBuffer) {
+  // 解心跳包
   let beginSign = rawBuffer.toString('hex', 0, 2)// 头
   let machineId = rawBuffer.toString('ascii', 2, 18)// 设备id
   let random = rawBuffer.readUInt32LE(18)// 随机值
@@ -25,21 +26,20 @@ module.exports = async function heartHandler (rawBuffer) {
   let wifi = rawBuffer.readUInt8(28)// wifi强度
   let mobileData = rawBuffer.readUInt8(29)// 移动数据强度
   let flag = rawBuffer.readUInt8(30)// 发送标志 0-wifi 1-移动数据
-  if (flag === 0) {
-    logger.debug('信号方式', 'wifi')
-    logger.debug('wifi信号强度', wifi)
-  }
-  if (flag === 1) {
-    logger.debug('信号方式', 'gprs')
-    logger.debug('gprs信号强度', mobileData)
-  }
-
-  let frameType = rawBuffer.readUInt8(31)// 帧类型 0-心跳 1-命令
-  logger.debug(`收到设备${machineId}帧类型`, frameType)
 
   let mType = MachineType.MachineTypeNormal
+
+  logger.debug(`设备id: ${machineId}, 版本: ${buildVersionStr(version)}, 转速: ${speed}`)
+  if (flag === 0) {
+    logger.debug(`信号方式: wifi; 信号强度: ${wifi}`)
+  }
+  if (flag === 1) {
+    logger.debug(`信号方式: gprs; 信号强度: ${mobileData}`)
+  }
+  let frameType = rawBuffer.readUInt8(31)// 帧类型 0-心跳 1-命令
+  logger.debug('当前数据包类型: 心跳')
+
   const stateStr = await redisCli.get(`${machineId}_state`)
-  logger.debug(`${machineId}_state is`, stateStr)
   if (stateStr) {
     let mState
     try {
@@ -54,8 +54,10 @@ module.exports = async function heartHandler (rawBuffer) {
     }
     if (flag === 0) {
       mState.wifi = wifi
+      mState.mobile = 0
     }
     if (flag === 1) {
+      mState.wifi = 0
       mState.mobile = mobileData
     }
     mState.flag = flag
@@ -81,12 +83,6 @@ module.exports = async function heartHandler (rawBuffer) {
   let LastTime = !LastTimeStr ? 0 : Number(LastTimeStr)
   await redisCli.set(`${machineId}_lastTick`, nowTime.toString())
 
-  logger.debug('activitedTimeStr:' + activitedTimeStr)
-  logger.debug('activitedTime:' + activitedTime.toString())
-  logger.debug('LastTimeStr:' + LastTimeStr)
-  logger.debug('LastTime:' + LastTime.toString())
-  logger.debug('Save nowTime:' + nowTime.toString())
-
   // 判断当时设备是否在使用
   if (speed > 1) {
     // 判定上次是否在使用中
@@ -101,10 +97,11 @@ module.exports = async function heartHandler (rawBuffer) {
   } else {
     await redisCli.del(`${machineId}_lastUse`)
   }
-
-  if (mType === MachineType.MachineTypeNormal) {
+  if (mType === MachineType.MachineTypeDirect) {
+    logger.debug('关闭 时间:', nowTime + 30)
     resBuffer.writeUInt32LE(nowTime + 300, 26)
   } else {
+    logger.debug('关闭时间:', activitedTime)
     resBuffer.writeUInt32LE(activitedTime, 26)
   }// 关闭时间
   resBuffer.writeInt8(0x00, 30)// 保留位
@@ -112,7 +109,7 @@ module.exports = async function heartHandler (rawBuffer) {
 
   // 加上校验
   resBuffer = hashFunc(resBuffer)
-  logger.debug('回复心跳 hex串', resBuffer.toString('hex'))
+  logger.debug('回复心跳 hex串:', resBuffer.toString('hex'))
   return {
     resBuffer,
     machineId,
