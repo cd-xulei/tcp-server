@@ -17,7 +17,7 @@ function netf () {
 
   client.on('data', data => {
     console.log(data)
-    client.end()
+    // client.end()
   })
 
   client.on('end', () => {
