@@ -54,12 +54,11 @@ module.exports = async function heartHandler (rawBuffer) {
     }
     if (flag === 0) {
       mState.wifi = wifi
-      mState.mobile = 0
     }
     if (flag === 1) {
-      mState.wifi = 0
       mState.mobile = mobileData
     }
+    mState.flag = flag
     mState.speed = speed
     mState.version = buildVersionStr(version)
     await redisCli.set(`${machineId}_state`, JSON.stringify(mState))
