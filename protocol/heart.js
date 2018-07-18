@@ -74,13 +74,13 @@ module.exports = async function heartHandler (rawBuffer) {
   // 判断当时设备是否在使用
   if (speed > 1) {
     // 判定上次是否在使用中
-    if (await redisCli.EXISTS(`${machineId}_lastUse`)) {
+    if (await redisCli.exists(`${machineId}_lastUse`)) {
       let useTime = nowTime - LastTime
       if (useTime <= 300) {
-        await redisCli.INCRBY(`${machineId}_useTime`, useTime)
+        await redisCli.incrby(`${machineId}_useTime`, useTime)
       }
     }
-    await redisCli.set(`${machineId}_lastUse`, '1')
+    await redisCli.set(`${machineId}_lastUse`, 1)
     await redisCli.expire(`${machineId}_lastUse`, 300)
   } else {
     await redisCli.del(`${machineId}_lastUse`)
