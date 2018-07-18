@@ -10,9 +10,12 @@ const heart = require('./protocol/heart.js')
 
 server.on('connection', function (socket) {
   // 从连接中读取数据
-  socket.on('data', function (data) {
-    logger.debug('接收的数据 hex:', data.toString('hex'))
-    const res = heart(data)
+  socket.on('data', function (buffer) {
+    logger.debug('接收的数据 hex:', buffer.toString('hex'))
+    if (!Buffer.isBuffer(buffer)) return
+    if (buffer.length < 32) return
+    if (buffer.toString('hex', 0, 2) !== 'aa55') return
+    const res = heart(buffer)
     socket.write(res)
   })
   // 删除被关闭的连接

@@ -26,7 +26,8 @@ MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
 // MachineType[MachineType["MachineTypeTurnover"] = 3] = "MachineTypeTurnover";
 
 module.exports = function heartHandler (rawBuffer) {
-  let beginSign = rawBuffer.readUInt16BE(0)// 头
+  let beginSign = rawBuffer.toString('hex', 0, 2)// 头
+  console.log(beginSign)
   let machineId = rawBuffer.toString('ascii', 2, 18)// 设备id
   let random = rawBuffer.readUInt32LE(18)// 随机值
   let version = rawBuffer.toString('hex', 22, 26)// 固定版本
