@@ -9,8 +9,8 @@ module.exports = {
   mode: 'production',
   target: 'node',
   output: {
-    path: path.join(__dirname, 'build'),
-    filename: 'bundle.js'
+    path: path.join(__dirname, 'tcp-server'),
+    filename: 'index.js'
   },
   resolve: {
     extensions: ['.js']
