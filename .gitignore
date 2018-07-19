@@ -62,3 +62,4 @@ typings/
 log
 yarn.lock
 build
+tcp-server
