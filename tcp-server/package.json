@@ -1,1 +1,0 @@
-{"name":"tcp-server","version":"1.0.0","description":"","main":"index.js","scripts":{},"author":"","dependencies":{"ioredis":"^3.2.2","lodash":"^4.17.10","log4js":"^3.0.0"}}
