@@ -15,4 +15,5 @@ tcp-server
 *.njsproj
 *.sln
 log
+src/log
 .zip
