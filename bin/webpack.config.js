@@ -4,12 +4,12 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
   entry: {
-    app: './index.js'
+    app: path.join(__dirname, '../index.js')
   },
   mode: 'production',
   target: 'node',
   output: {
-    path: path.join(__dirname, 'tcp-server'),
+    path: path.join(__dirname, '../tcp-server'),
     filename: 'index.js'
   },
   resolve: {
@@ -51,7 +51,7 @@ module.exports = {
 }
 
 function _externals () {
-  let manifest = require('./package.json')
+  let manifest = require(path.join(__dirname, '../package.json'))
   let dependencies = manifest.dependencies
   let externals = {}
   for (let p in dependencies) {
