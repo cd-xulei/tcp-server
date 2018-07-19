@@ -1,0 +1,1 @@
+"use strict";module.exports=(async e=>{if(Buffer.isBuffer(e)&&!(e.length<32)&&"aa55"===e.toString("hex",0,2))return e});
