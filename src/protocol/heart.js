@@ -15,22 +15,10 @@ MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
 MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
 MachineType[MachineType['MachineTypeTurnover'] = 3] = 'MachineTypeTurnover'
 
-module.exports = async function heartHandler (rawBuffer) {
-  // 解心跳包
-  let beginSign = rawBuffer.toString('hex', 0, 2)// 头
-  let machineId = rawBuffer.toString('ascii', 2, 18)// 设备id
-  let random = rawBuffer.readUInt32LE(18)// 随机值
-  let version = rawBuffer.toString('hex', 22, 26)// 固定版本
+module.exports = async function heartHandler (params) {
+  const { beginSign, machineId, random, version, speed, wifi, mobileData, flag, frameType } = params
 
-  let speed = rawBuffer.readUInt16BE(26)// 风机转速
-  let wifi = rawBuffer.readUInt8(28)// wifi强度
-  let mobileData = rawBuffer.readUInt8(29)// 移动数据强度
-  let flag = rawBuffer.readUInt8(30)// 发送标志 0-wifi 1-移动数据
-  let frameType = rawBuffer.readUInt8(31)// 帧类型 0-心跳 1-命令
-  if (frameType === 0) {
-    logger.debug('当前数据包类型: 心跳')
-  }
-  if (frameType === 1) return null
+  logger.debug('当前数据包类型: 心跳')
 
   let mType = MachineType.MachineTypeNormal
   logger.debug(`设备id: ${machineId}`)
