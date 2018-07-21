@@ -59,3 +59,10 @@ server.listen(PORT, () => {
   const address = server.address()
   logger.debug(`tcp server listening on ${address.port}`)
 })
+
+process.on('uncaughtException', function (err) {
+  // 打印出错误
+  logger.error('其他错误', err.message)
+  // 打印出错误的调用栈方便调试
+  logger.error(err.stack)
+})
