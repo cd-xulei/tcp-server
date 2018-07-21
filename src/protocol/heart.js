@@ -63,6 +63,7 @@ module.exports = async function heartHandler (params) {
   resBuffer.writeUInt16LE(0x55AA, 0) // 头
   resBuffer.write(machineId, 2, 16, 'ascii')// 机器id
   resBuffer.writeUInt32LE(random, 18)// 随机码
+  logger.debug('当前时间:', nowTime)
   resBuffer.writeUInt32LE(nowTime, 22)// 当前时间
 
   let activitedTimeStr = await redisCli.get(`${machineId}_activited`)
@@ -86,10 +87,10 @@ module.exports = async function heartHandler (params) {
   } else {
     await redisCli.del(`${machineId}_lastUse`)
   }
+
   let closeTime = mType === MachineType.MachineTypeDirect ? nowTime + 300 : activitedTime
-  logger.debug('当前时间:', nowTime)
   logger.debug('关闭时间:', closeTime)
-  resBuffer.writeUInt32LE(nowTime + 300, 26)
+  resBuffer.writeUInt32LE(closeTime, 26)
 
   resBuffer.writeInt8(0x00, 30)// 保留位
   resBuffer.writeInt8(0x00, 31)// 帧类型

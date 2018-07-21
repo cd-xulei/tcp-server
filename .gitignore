@@ -16,4 +16,4 @@ tcp-server
 *.sln
 log
 src/log
-.zip
+**/*.zip
