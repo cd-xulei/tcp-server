@@ -38,10 +38,10 @@ module.exports = async function heartHandler (params) {
     }
     if (flag === 0) {
       mState.wifi = wifi
-      mState.mobile = 0
+      mState.mobile = mobileData
     }
     if (flag === 1) {
-      mState.wifi = 0
+      mState.wifi = wifi
       mState.mobile = mobileData
     }
     mState.flag = flag
