@@ -1,12 +1,12 @@
 'use strict'
 
 const net = require('net')
-const logger = require('./helpers/logger.js').getLogger('index')
 
 const PORT = process.env.PORT || 3389
 const server = net.createServer()
 
-// route
+const logger = require('./helpers/logger.js').getLogger('index')
+
 const parse = require('./protocol/parse.js')
 const heart = require('./protocol/heart.js')
 
@@ -27,10 +27,20 @@ server.on('connection', function (socket) {
         if (buffer.toString('hex', 0, 2) !== 'aa55') return
 
         let res
-        // 解析心跳域
-        const params = await parse(buffer)
-        if (params.frameType === 0) {
-            res = await heart(params)
+        try {
+            const params = await parse(buffer)
+            // 处理心跳帧
+            if (params.frameType === 0) {
+                res = await heart(params)
+            }
+            // 处理命令帧
+            if (params.frameType === 1) {
+
+            }
+        } catch (err) {
+            logger.error('业务代码报错!')
+            logger.error(err.stack)
+            logger.error(err.message)
         }
         res && socket.write(res.resBuffer)
     })
