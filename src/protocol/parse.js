@@ -25,8 +25,13 @@ module.exports = async function (rawBuffer) {
     }
     // 命令帧
     if (rawBuffer.length > 32) {
-        Object.assign(params, {
-
+      Object.assign(params, {
+        // 帧号
+        frameNum: rawBuffer.readUInt16LE(32),
+        // cmd
+        cmdCode: rawBuffer.readUInt8(34),
+        // status 接收状态
+        recevieStatus: rawBuffer.readUInt8(35)
         })
     }
     return params

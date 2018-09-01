@@ -7,6 +7,7 @@
 const logger = require('../helpers/logger.js').getLogger('heart')
 const hashFunc = require('../helpers/hashFunc.js')
 
+const dataFunc = require('../lib/dataFunc.js')
 const redisCli = require('../helpers/redis.js')
 const _ = require('lodash')
 // 设备的三种状态
@@ -94,6 +95,10 @@ module.exports = async function heartHandler (params) {
 
     resBuffer.writeInt8(0x00, 30)// 保留位
     resBuffer.writeInt8(0x00, 31)// 帧类型
+
+    //这里在心跳域的基础上增加数据域
+
+    resBuffer = await dataFunc(resBuffer)
 
     // 加上校验
     resBuffer = hashFunc(resBuffer)
