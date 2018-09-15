@@ -2,7 +2,7 @@
 
 const log4js = require('log4js')
 
-let LEVEL = process.env.NODE_ENV === 'testing' ? 'INFO' : 'ALL'
+let LEVEL = process.env.NODE_ENV === 'production' ? 'INFO' : 'ALL'
 
 const config = {
   replaceConsole: true,

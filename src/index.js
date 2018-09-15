@@ -9,6 +9,7 @@ const logger = require('./helpers/logger.js').getLogger('index')
 
 const parse = require('./protocol/parse.js')
 const heart = require('./protocol/heart.js')
+const handle = require('./lib/handle.js')
 
 server.on('connection', function (socket) {
     server.getConnections((err, count) => {
@@ -28,19 +29,15 @@ server.on('connection', function (socket) {
 
         let res
         try {
-            const params = await parse(buffer)
-            // 处理心跳帧
-            if (params.frameType === 0) {
-                res = await heart(params)
-            }
-            // 处理命令帧
-            if (params.frameType === 1) {
+            let params = await parse(buffer)
+            params = await  heart(params)
+            res = await handle(params)
 
-            }
         } catch (err) {
-            logger.error('业务代码报错!')
+            logger.error('出现错误!')
             logger.error(err.stack)
             logger.error(err.message)
+            return
         }
         res && socket.write(res.resBuffer)
     })
@@ -67,7 +64,7 @@ server.on('close', function () {
 
 server.listen(PORT, () => {
     const address = server.address()
-    logger.debug(`tcp server listening on ${address.port}`)
+    logger.info(`tcp server listening on ${address.port}`)
 })
 
 process.on('uncaughtException', function (err) {
