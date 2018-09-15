@@ -1,6 +1,58 @@
 'use strict'
 
-// const logger = require('../helpers/logger.js').getLogger('parse')
+
+const only = require('only')
+const logger = require('../helpers/logger.js').getLogger('parse')
+const redisCli = require('../helpers/redis')
+
+
+const channel = 'MACHINE_RELPY_INFO'
+
+
+
+const handler = {
+    // 终端回复 复位数据包
+    '0x00': params => {
+        redisCli.publish('channel', JSON.stringify(only(params,'machineId cmdHexCode recevieStatus')))
+    },
+    // 终端回复 服务端的读配置命令
+    '0x01': async (params, rawBuffer) => {
+        const data = {
+            payloadLen: rawBuffer.readUInt16LE(36),
+            waitToReadAt: rawBuffer.readUInt16LE(38),
+            waitToReadLen: rawBuffer.readUInt16LE(40),
+            readHex: rawBuffer.toString('hex',42)
+        }
+        redisCli.hmset(`${params.machineId}_CONFIG`, {
+            [data.waitToReadAt]: data.readHex
+        })
+        return { ...params, ...data }
+    },
+    '0x02': params => {
+        redisCli.publish('channel', JSON.stringify(only(params,'machineId cmdHexCode recevieStatus')))
+    },
+    // 读复位命令
+    '0x0A': (params, rawBuffer) => {
+        let data={}
+        if (params.recevieStatus === 0) {
+             data = {
+                payloadLen: rawBuffer.readUInt16LE(36),
+                resetTag: rawBuffer.readUInt16LE(38)
+            }
+        }
+        redisCli.publish(key, JSON.stringify({
+            ...only(params, 'machineId cmdHexCode recevieStatus'),
+            data
+        }))
+    },
+    // 清除复位命令
+    '0x0B': params => {
+        redisCli.publish('channel', JSON.stringify(only(params,'machineId cmdHexCode recevieStatus')))
+    }
+}
+
+
+
 
 module.exports = async function (rawBuffer) {
     const params = {
@@ -24,15 +76,16 @@ module.exports = async function (rawBuffer) {
         frameType: rawBuffer.readUInt8(31)
     }
     // 命令帧
-    if (rawBuffer.length > 32) {
+    if (rawBuffer.length >= 32 && params.frameType === 1) {
       Object.assign(params, {
         // 帧号
         frameNum: rawBuffer.readUInt16LE(32),
         // cmd
         cmdCode: rawBuffer.readUInt8(34),
+        cmdHexCode: '0x' + rawBuffer.toString('hex',34,35).toUpperCase(),
         // status 接收状态
         recevieStatus: rawBuffer.readUInt8(35)
         })
     }
-    return params
+    return handler[params.cmdCode] ? handler[params.cmdCode](params, rawBuffer) : params
 }

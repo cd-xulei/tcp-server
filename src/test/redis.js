@@ -24,4 +24,9 @@ async function build(params) {
   return getId
 }
 
-build().then(() => process.exit())
+async function mm() {
+  redisCli.publish('12','inu')
+}
+mm()
+
+// build().then(() => process.exit())
