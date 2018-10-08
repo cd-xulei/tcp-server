@@ -7,9 +7,12 @@
 const logger = require('../helpers/logger.js').getLogger('heart')
 const hashFunc = require('../helpers/hashFunc.js')
 
-const dataFunc = require('../lib/dataFunc.js')
-const redisCli = require('../helpers/redis.js')
 const _ = require('lodash')
+const dataFunc = require('../lib/sendCmdFunc.js')
+const redisCli = require('../helpers/redis.js')
+
+const readcmd = require('../db/readcmd.js')
+
 // 设备的三种状态
 let MachineType = {}
 MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
@@ -19,10 +22,10 @@ MachineType[MachineType['MachineTypeTurnover'] = 3] = 'MachineTypeTurnover'
 module.exports = async function heartHandler (params) {
     const { beginSign, machineId, random, version, speed, wifi, mobileData, flag, frameType } = params
 
-    logger.debug('当前数据包类型: 心跳')
+    logger.info('当前数据包类型: 心跳')
 
     let mType = MachineType.MachineTypeNormal
-    logger.debug(`设备id: ${machineId}`)
+    logger.info(`设备id: ${machineId}`)
 
     const stateStr = await redisCli.get(`${machineId}_state`)
     if (stateStr) {
@@ -52,10 +55,10 @@ module.exports = async function heartHandler (params) {
     }
     const logString = `模式: ${mType}, 版本: ${buildVersionStr(version)}, 转速: ${speed}`
     if (flag === 0) {
-        logger.debug(`信号方式: wifi; 信号强度: ${wifi}, ${logString}`)
+        logger.info(`信号方式: wifi; 信号强度: ${wifi}, ${logString}`)
     }
     if (flag === 1) {
-        logger.debug(`信号方式: gprs; 信号强度: ${mobileData}, ${logString}`)
+        logger.info(`信号方式: gprs; 信号强度: ${mobileData}, ${logString}`)
     }
 
     const nowTime = ~~(Date.now() / 1000)
@@ -95,10 +98,6 @@ module.exports = async function heartHandler (params) {
 
     resBuffer.writeInt8(0x00, 30)// 保留位
     resBuffer.writeInt8(0x00, 31)// 帧类型
-
-    //这里在心跳域的基础上增加数据域
-
-    resBuffer = await dataFunc(resBuffer)
 
     // 加上校验
     resBuffer = hashFunc(resBuffer)

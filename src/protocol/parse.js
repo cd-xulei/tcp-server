@@ -1,19 +1,16 @@
 'use strict'
 
-
 const only = require('only')
 const logger = require('../helpers/logger.js').getLogger('parse')
 const redisCli = require('../helpers/redis')
 
-
 const channel = 'MACHINE_RELPY_INFO'
-
-
 
 const handler = {
     // 终端回复 复位数据包
     '0x00': params => {
-        redisCli.publish('channel', JSON.stringify(only(params,'machineId cmdHexCode recevieStatus')))
+        logger.debug('收到终端回复 0x00')
+        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode recevieStatus')))
     },
     // 终端回复 服务端的读配置命令
     '0x01': async (params, rawBuffer) => {
@@ -21,7 +18,7 @@ const handler = {
             payloadLen: rawBuffer.readUInt16LE(36),
             waitToReadAt: rawBuffer.readUInt16LE(38),
             waitToReadLen: rawBuffer.readUInt16LE(40),
-            readHex: rawBuffer.toString('hex',42)
+            readHex: rawBuffer.toString('hex', 42)
         }
         redisCli.hmset(`${params.machineId}_CONFIG`, {
             [data.waitToReadAt]: data.readHex
@@ -29,30 +26,27 @@ const handler = {
         return { ...params, ...data }
     },
     '0x02': params => {
-        redisCli.publish('channel', JSON.stringify(only(params,'machineId cmdHexCode recevieStatus')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode recevieStatus')))
     },
     // 读复位命令
     '0x0A': (params, rawBuffer) => {
-        let data={}
+        let data = {}
         if (params.recevieStatus === 0) {
-             data = {
+            data = {
                 payloadLen: rawBuffer.readUInt16LE(36),
                 resetTag: rawBuffer.readUInt16LE(38)
             }
         }
-        redisCli.publish(key, JSON.stringify({
+        redisCli.publish(channel, JSON.stringify({
             ...only(params, 'machineId cmdHexCode recevieStatus'),
             data
         }))
     },
     // 清除复位命令
     '0x0B': params => {
-        redisCli.publish('channel', JSON.stringify(only(params,'machineId cmdHexCode recevieStatus')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode recevieStatus')))
     }
 }
-
-
-
 
 module.exports = async function (rawBuffer) {
     const params = {
@@ -77,15 +71,16 @@ module.exports = async function (rawBuffer) {
     }
     // 命令帧
     if (rawBuffer.length >= 32 && params.frameType === 1) {
-      Object.assign(params, {
+        Object.assign(params, {
         // 帧号
-        frameNum: rawBuffer.readUInt16LE(32),
-        // cmd
-        cmdCode: rawBuffer.readUInt8(34),
-        cmdHexCode: '0x' + rawBuffer.toString('hex',34,35).toUpperCase(),
-        // status 接收状态
-        recevieStatus: rawBuffer.readUInt8(35)
+            frameNum: rawBuffer.readUInt16LE(32),
+            // cmd
+            cmdCode: rawBuffer.readUInt8(34),
+            cmdHexCode: '0x' + rawBuffer.toString('hex', 34, 35).toUpperCase(),
+            // status 接收状态
+            recevieStatus: rawBuffer.readUInt8(35)
         })
+        logger.debug('终端回复数据', JSON.stringify(params))
     }
     return handler[params.cmdCode] ? handler[params.cmdCode](params, rawBuffer) : params
 }

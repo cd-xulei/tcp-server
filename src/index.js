@@ -30,9 +30,8 @@ server.on('connection', function (socket) {
         let res
         try {
             let params = await parse(buffer)
-            params = await  heart(params)
+            params = await heart(params)
             res = await handle(params)
-
         } catch (err) {
             logger.error('出现错误!')
             logger.error(err.stack)
