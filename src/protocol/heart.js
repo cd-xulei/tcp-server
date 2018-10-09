@@ -101,7 +101,6 @@ module.exports = async function heartHandler (params) {
 
     // 加上校验
     resBuffer = hashFunc(resBuffer)
-    logger.debug('回复心跳 hex串:', resBuffer.toString('hex'))
     logger.debug('\r\n')
     return {
         resBuffer,

@@ -2,7 +2,7 @@
 
 const net = require('net')
 
-const PORT = process.env.PORT || 3389
+const PORT = process.env.PORT || 8181
 const server = net.createServer()
 
 const logger = require('./helpers/logger.js').getLogger('index')
@@ -32,6 +32,7 @@ server.on('connection', function (socket) {
             let params = await parse(buffer)
             params = await heart(params)
             res = await handle(params)
+            logger.debug('回复 hex串:', res.resBuffer.toString('hex'))
         } catch (err) {
             logger.error('出现错误!')
             logger.error(err.stack)
