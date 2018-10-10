@@ -2,13 +2,15 @@
 
 const redisCli = require('../helpers/redis')
 const key = 'FRAME_ID'
+const logger = require('log4js').getLogger()
 
 // 经过这里之前 先改变原始包中的帧类型
 
 async function buildFrameId () {
     const id = await redisCli.incr(key)
     let frameId = await redisCli.get(key)
-    if (frameId >= 65536) {
+    logger.log(typeof frameId)
+    if (frameId >= 255) {
         let frameId = 0
         await redisCli.set(key, frameId)
     }
@@ -28,13 +30,18 @@ async function reset (resBuffer) {
 async function readConfig (resBuffer) {
     const buffer = Buffer.alloc(3 + 6)
     const frameId = await buildFrameId()
-    buffer.writeInt16LE(frameId, 0)
-    buffer.writeInt8(0x01, 2)
-    buffer.writeInt16LE(4, 3)
-    buffer.writeInt16LE(0, 5)
-    buffer.writeInt16LE(255, 7)
+    buffer.writeUInt8(frameId, 0)
+    // 0x01
+    buffer.writeUInt8(1, 1)
+    // 数据域长度定为3
+    buffer.writeInt16LE(3, 2)
 
-    return Buffer.concat([resBuffer, buffer], resBuffer.length + buffer.length)
+    buffer.writeInt16LE(0, 3)
+    buffer.writeInt16LE(233, 5)
+    const prefix = resBuffer.slice(0, 32)
+    console.log('resBuffer', prefix)
+    console.log('buffer', buffer)
+    return Buffer.concat([prefix, buffer], prefix.length + buffer.length)
 }
 
 // 0x02 写配置命令 暂未实现

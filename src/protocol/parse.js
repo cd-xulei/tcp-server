@@ -20,6 +20,7 @@ const handler = {
             waitToReadLen: rawBuffer.readUInt16LE(40),
             readHex: rawBuffer.toString('hex', 42)
         }
+        logger.info('0x01 解回复数据', data)
         redisCli.hmset(`${params.machineId}_CONFIG`, {
             [data.waitToReadAt]: data.readHex
         })
@@ -73,14 +74,15 @@ module.exports = async function (rawBuffer) {
     if (rawBuffer.length >= 32 && params.frameType === 1) {
         Object.assign(params, {
         // 帧号
-            frameNum: rawBuffer.readUInt16LE(32),
+            frameNum: rawBuffer.readUInt8(32),
             // cmd
-            cmdCode: rawBuffer.readUInt8(34),
-            cmdHexCode: '0x' + rawBuffer.toString('hex', 34, 35).toUpperCase(),
+            cmdCode: rawBuffer.readUInt8(33),
+            cmdHexCode: '0x' + rawBuffer.toString('hex', 33, 34).toUpperCase(),
             // status 接收状态
-            recevieStatus: rawBuffer.readUInt8(35)
+            operateResult: rawBuffer.readUInt8(34),
+            payloadLen: rawBuffer.readUInt8(35)
         })
         logger.debug('终端回复数据', JSON.stringify(params))
     }
-    return handler[params.cmdCode] ? handler[params.cmdCode](params, rawBuffer) : params
+    return handler[params.cmdHexCode] ? handler[params.cmdHexCode](params, rawBuffer) : params
 }
