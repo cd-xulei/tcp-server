@@ -4,6 +4,7 @@ const only = require('only')
 const logger = require('../helpers/logger.js').getLogger('parse')
 const redisCli = require('../helpers/redis')
 
+const _ = require('lodash')
 const channel = 'MACHINE_RELPY_INFO'
 
 const handler = {
@@ -14,16 +15,22 @@ const handler = {
     },
     // 终端回复 服务端的读配置命令
     '0x01': async (params, rawBuffer) => {
-        const data = {
-            payloadLen: rawBuffer.readUInt16LE(36),
-            waitToReadAt: rawBuffer.readUInt16LE(38),
-            waitToReadLen: rawBuffer.readUInt16LE(40),
-            readHex: rawBuffer.toString('hex', 42)
+        const configBuffer = rawBuffer.slice(36)
+
+        let data = {
+            machineId: configBuffer.toString('ascii', 0, 16),
+            hardwareInfo: configBuffer.toString('ascii', 17, 33),
+            protocol: configBuffer.toString('ascii', 34, 37),
+            ip: configBuffer.toString('ascii', 38, 53),
+            remotePort: configBuffer.toString('ascii', 54, 59),
+            localPort: configBuffer.toString('ascii', 60, 65),
+            wifi: configBuffer.toString('ascii', 66, 98),
+            wifiSecretType: configBuffer.toString('ascii', 99, 100),
+            wifiPass: configBuffer.toString('ascii', 101, 164),
+            wifiChannel: configBuffer.toString('ascii', 165, 167),
+            apn: configBuffer.toString('ascii', 168)
         }
-        logger.info('0x01 解回复数据', data)
-        redisCli.hmset(`${params.machineId}_CONFIG`, {
-            [data.waitToReadAt]: data.readHex
-        })
+        logger.info('0x01 解回复数据', JSON.stringify(data))
         return { ...params, ...data }
     },
     '0x02': params => {
