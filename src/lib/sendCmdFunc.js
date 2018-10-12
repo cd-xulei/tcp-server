@@ -45,7 +45,7 @@ async function readConfig (resBuffer) {
 }
 
 // 0x02 写配置命令 暂未实现
-async function writeConfig (resBuffer) {
+async function writeConfig (resBuffer, params) {
     const buffer = Buffer.alloc(3 + 6)
     const frameId = await buildFrameId()
     buffer.writeInt16LE(frameId, 0)

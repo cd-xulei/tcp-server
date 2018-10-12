@@ -4,7 +4,6 @@ const only = require('only')
 const logger = require('../helpers/logger.js').getLogger('parse')
 const redisCli = require('../helpers/redis')
 
-const _ = require('lodash')
 const channel = 'MACHINE_RELPY_INFO'
 
 const handler = {
@@ -28,9 +27,13 @@ const handler = {
             wifiSecretType: configBuffer.toString('ascii', 99, 100),
             wifiPass: configBuffer.toString('ascii', 101, 164),
             wifiChannel: configBuffer.toString('ascii', 165, 167),
-            apn: configBuffer.toString('ascii', 168)
+            apn: configBuffer.toString('ascii', 168),
+            cmdCode: 'Ox01',
+            msg: '读到社保的配置信息'
         }
+
         logger.info('0x01 解回复数据', JSON.stringify(data))
+        redisCli.publish(channel)
         return { ...params, ...data }
     },
     '0x02': params => {

@@ -17,13 +17,16 @@ module.exports = async function (params) {
     logger.debug('redis中读到的命令码:', `CMD_${machineId}`, cmd)
     // 不存在 则直接回复心跳
     if (!cmd) return params
-
-    cmd = JSON.parse(cmd)
+    try {
+        cmd = JSON.parse(cmd)
+    } catch (err) {
+        logger.error('后端向redis中写命令 格式出错', err.message)
+    }
     // 根据命令码写命令包
     if (sendCmdFunc[cmd.cmdCode]) {
         // 改为命令帧
         resBuffer.writeInt8(0x01, 31)
-        resBuffer = await sendCmdFunc[cmd.cmdCode](resBuffer)
+        resBuffer = await sendCmdFunc[cmd.cmdCode](resBuffer, cmd)
         // 加签名
         resBuffer = hashFunc(resBuffer)
         return { ...params, resBuffer }
