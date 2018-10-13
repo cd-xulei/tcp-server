@@ -31,9 +31,8 @@ const handler = {
             cmdCode: 'Ox01',
             msg: '读到社保的配置信息'
         }
-
         logger.info('0x01 解回复数据', JSON.stringify(data))
-        redisCli.publish(channel)
+        redisCli.publish(channel, JSON.stringify(data))
         return { ...params, ...data }
     },
     '0x02': params => {

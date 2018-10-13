@@ -4,6 +4,7 @@ const redisCli = require('../helpers/redis')
 const key = 'FRAME_ID'
 const logger = require('log4js').getLogger()
 
+const configTem = require('../helpers/configTem.js')
 // 经过这里之前 先改变原始包中的帧类型
 
 async function buildFrameId () {
@@ -39,17 +40,19 @@ async function readConfig (resBuffer) {
     buffer.writeInt16LE(0, 3)
     buffer.writeInt16LE(233, 5)
     const prefix = resBuffer.slice(0, 32)
-    console.log('resBuffer', prefix)
-    console.log('buffer', buffer)
     return Buffer.concat([prefix, buffer], prefix.length + buffer.length)
 }
 
 // 0x02 写配置命令 暂未实现
 async function writeConfig (resBuffer, params) {
-    const buffer = Buffer.alloc(3 + 6)
+    const buffer = Buffer.alloc(3)
     const frameId = await buildFrameId()
-    buffer.writeInt16LE(frameId, 0)
+    buffer.writeInt8(frameId, 0)
     buffer.writeInt8(0x02, 2)
+    buffer.writeInt8(233, 3)
+    const configBuffer = configTem.buildConfigBuffer(params)
+    const prefix = resBuffer.slice(0, 32)
+    return Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)
 }
 
 // 0x0A 读复位命令
