@@ -52,7 +52,12 @@ async function writeConfig (resBuffer, params) {
     buffer.writeInt8(233, 3)
     const configBuffer = configTem.buildConfigBuffer(params)
     const prefix = resBuffer.slice(0, 32)
-    return Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)
+    const res = Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)
+    console.log(prefix.length)
+    console.log(buffer.length)
+    console.log(configBuffer.length)
+    console.log(res.length)
+    return res
 }
 
 // 0x0A 读复位命令

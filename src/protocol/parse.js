@@ -27,7 +27,7 @@ const handler = {
             wifiSecretType: configBuffer.toString('ascii', 99, 100),
             wifiPass: configBuffer.toString('ascii', 101, 164),
             wifiChannel: configBuffer.toString('ascii', 165, 167),
-            apn: configBuffer.toString('ascii', 168),
+            apn: configBuffer.toString('ascii', 168, 233),
             cmdCode: 'Ox01',
             msg: '读到社保的配置信息'
         }
