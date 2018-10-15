@@ -10,7 +10,12 @@ const handler = {
     // 终端回复 复位数据包
     '0x00': params => {
         logger.debug('收到终端回复 0x00')
-        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode recevieStatus')))
+        if (!params.operateResult) {
+            logger.info('复位 操作成功!')
+            redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode operateResult')))
+        } else {
+            logger.error('复位 操作失败!')
+        }
     },
     // 终端回复 服务端的读配置命令
     '0x01': async (params, rawBuffer) => {
@@ -35,26 +40,44 @@ const handler = {
         redisCli.publish(channel, JSON.stringify(data))
         return { ...params, ...data }
     },
+    // 写配置命令
     '0x02': params => {
-        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode recevieStatus')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode operateResult')))
+        if (!params.operateResult) {
+            logger.info('改配置成功!')
+        }
+        if (params.operateResult === 1) {
+            logger.error('改配置失败!')
+        }
+        return params
     },
-    // 读复位命令
+    // 读复位值命令
     '0x0A': (params, rawBuffer) => {
         let data = {}
-        if (params.recevieStatus === 0) {
+        if (params.operateResult === 0) {
             data = {
-                payloadLen: rawBuffer.readUInt16LE(36),
-                resetTag: rawBuffer.readUInt16LE(38)
+                code: rawBuffer.readUInt8(37),
+                msg: ''
             }
         }
         redisCli.publish(channel, JSON.stringify({
-            ...only(params, 'machineId cmdHexCode recevieStatus'),
+            ...only(params, 'machineId cmdHexCode operateResult'),
             data
         }))
     },
     // 清除复位命令
     '0x0B': params => {
-        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode recevieStatus')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode operateResult')))
+    },
+    // 读到的电压值
+    '0x09': (params, rawBuffer) => {
+        const data = {
+            voltage: rawBuffer.readUInt16BE(36)
+        }
+        redisCli.publish(channel, JSON.stringify({
+            ...only(params, 'machineId cmdHexCode operateResult'),
+            data
+        }))
     }
 }
 

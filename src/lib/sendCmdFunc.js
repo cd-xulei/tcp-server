@@ -22,8 +22,9 @@ async function buildFrameId () {
 async function reset (resBuffer) {
     const resetBuffer = Buffer.alloc(3)
     const frameId = await buildFrameId()
-    resetBuffer.writeUInt16LE(frameId, 0)
-    resetBuffer.writeUInt8(0x00, 2)
+    resetBuffer.writeUInt8(frameId, 0)
+    resetBuffer.writeUInt8(0x00, 1)
+    resetBuffer.writeUInt8(0, 2)
     return Buffer.concat([resBuffer, resetBuffer], resetBuffer.length + resBuffer.length)
 }
 
@@ -45,18 +46,16 @@ async function readConfig (resBuffer) {
 
 // 0x02 写配置命令 暂未实现
 async function writeConfig (resBuffer, params) {
-    const buffer = Buffer.alloc(3)
+    const buffer = Buffer.alloc(3 + 3)
     const frameId = await buildFrameId()
-    buffer.writeInt8(frameId, 0)
-    buffer.writeInt8(0x02, 2)
-    buffer.writeInt8(233, 3)
+    buffer.writeUInt8(frameId, 0)
+    buffer.writeUInt8(0x02, 1)
+    buffer.writeUInt8(236, 2)
+    buffer.writeInt16BE(0, 3)
+    buffer.writeUInt8(233, 5)
     const configBuffer = configTem.buildConfigBuffer(params)
     const prefix = resBuffer.slice(0, 32)
     const res = Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)
-    console.log(prefix.length)
-    console.log(buffer.length)
-    console.log(configBuffer.length)
-    console.log(res.length)
     return res
 }
 
@@ -64,8 +63,9 @@ async function writeConfig (resBuffer, params) {
 async function readReset (resBuffer) {
     const buffer = Buffer.alloc(3)
     const frameId = await buildFrameId()
-    buffer.writeInt16LE(frameId, 0)
-    buffer.writeInt8(0x0A, 2)
+    buffer.writeUInt8(frameId, 0)
+    buffer.writeUInt8(0x0A, 1)
+    buffer.writeUInt8(0, 2)
     return Buffer.concat([resBuffer, buffer], resBuffer.length + buffer.length)
 }
 
@@ -73,8 +73,19 @@ async function readReset (resBuffer) {
 async function clearReset (resBuffer) {
     const buffer = Buffer.alloc(3)
     const frameId = await buildFrameId()
-    buffer.writeInt16LE(frameId, 0)
-    buffer.writeInt8(0x0B, 2)
+    buffer.writeUInt8(frameId, 0)
+    buffer.writeUInt8(0x0B, 1)
+    buffer.writeUInt8(0, 2)
+    return Buffer.concat([resBuffer, buffer], resBuffer.length + buffer.length)
+}
+
+// 0x09 读电压值
+async function readVoltage (resBuffer) {
+    const buffer = Buffer.alloc(3)
+    const frameId = await buildFrameId()
+    buffer.writeUInt8(frameId, 0)
+    buffer.writeUInt8(0x09, 1)
+    buffer.writeUInt8(0x00, 2)
     return Buffer.concat([resBuffer, buffer], resBuffer.length + buffer.length)
 }
 
@@ -83,5 +94,6 @@ module.exports = {
     '0x01': readConfig,
     '0x02': writeConfig,
     '0x0A': readReset,
-    '0x0B': clearReset
+    '0x0B': clearReset,
+    '0x09': readVoltage
 }
