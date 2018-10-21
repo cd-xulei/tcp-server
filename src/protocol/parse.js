@@ -33,8 +33,8 @@ const handler = {
             wifiPass: configBuffer.toString('ascii', 101, 164),
             wifiChannel: configBuffer.toString('ascii', 165, 167),
             apn: configBuffer.toString('ascii', 168, 233),
-            cmdCode: 'Ox01',
-            msg: '读到社保的配置信息'
+            cmdCode: '0x01',
+            msg: '读到设备的配置信息,写配置时,请保持与当前json一样的结构'
         }
         logger.info('0x01 解回复数据', JSON.stringify(data))
         redisCli.publish(channel, JSON.stringify(data))

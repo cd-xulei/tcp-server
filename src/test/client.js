@@ -17,7 +17,7 @@ const buff4 = 'aa55363636303030303030303030303030311bb99b22010203020000000000013
 function netf () {
     const client = net.createConnection({ port: PORT, host: HOST })
 
-    client.write(Buffer.from(buff4, 'hex'))
+    client.write(Buffer.from(buff1, 'hex'))
 
     client.on('data', data => {
         console.log(data)

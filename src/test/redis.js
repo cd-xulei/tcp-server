@@ -22,5 +22,5 @@ redisCli.set('CMD_6660000000000001', JSON.stringify({
     'wifiPass': '123456789',
     'wifiChannel': 'MN',
     'apn': 'T',
-    'cmdCode': '0x02'
+    'cmdHexCode': '0x02'
 }))
