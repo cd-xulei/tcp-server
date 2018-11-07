@@ -55,8 +55,7 @@ async function writeConfig (resBuffer, params) {
     buffer.writeUInt8(233, 5)
     const configBuffer = configTem.buildConfigBuffer(params)
     const prefix = resBuffer.slice(0, 32)
-    console.log(buffer)
-    console.log(configBuffer)
+
     const res = Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)
     return res
 }

@@ -22,17 +22,16 @@ const handler = {
         const configBuffer = rawBuffer.slice(36)
 
         let data = {
-            machineId: configBuffer.toString('ascii', 0, 16),
-            hardwareInfo: configBuffer.toString('ascii', 17, 33),
-            protocol: configBuffer.toString('ascii', 34, 37),
-            ip: configBuffer.toString('ascii', 38, 53),
-            remotePort: configBuffer.toString('ascii', 54, 59),
-            localPort: configBuffer.toString('ascii', 60, 65),
-            wifi: configBuffer.toString('ascii', 66, 98),
-            wifiSecretType: configBuffer.toString('ascii', 99, 100),
-            wifiPass: configBuffer.toString('ascii', 101, 164),
-            wifiChannel: configBuffer.toString('ascii', 165, 167),
-            apn: configBuffer.toString('ascii', 168, 233),
+            machineId: configBuffer.toString('ascii', 0, 17),
+            hardwareInfo: configBuffer.toString('ascii', 17, 34),
+            protocol: configBuffer.toString('ascii', 34, 38),
+            ip: configBuffer.toString('ascii', 38, 54),
+            remotePort: configBuffer.toString('ascii', 54, 60),
+            localPort: configBuffer.toString('ascii', 60, 66),
+            wifi: configBuffer.toString('ascii', 66, 99),
+            wifiSecretType: configBuffer.toString('ascii', 99, 101),
+            wifiPass: configBuffer.toString('ascii', 101, 165),
+            apn: configBuffer.toString('ascii', 165, 230),
             cmdCode: '0x01',
             msg: '读到设备的配置信息,写配置时,请保持与当前json一样的结构'
         }
