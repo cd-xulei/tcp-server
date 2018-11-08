@@ -10,7 +10,7 @@ const redisCli = new Redis({
     db: 0
 })
 
-redisCli.set('CMD_6660000000000001', JSON.stringify({
+const str = JSON.stringify({
     'machineId': '6660000000000001',
     'hardwareInfo': 'LFS2101D_V0.1',
     'protocol': 'TCP',
@@ -21,9 +21,10 @@ redisCli.set('CMD_6660000000000001', JSON.stringify({
     'wifiSecretType': '2',
     'wifiPass': '0123456789',
     'wifiChannel': 'MN',
-    'apn': 'CMNET',
+    'apn': 'CMNET',
     'cmdHexCode': '0x02'
-}))
+})
+redisCli.set('CMD_6660000000000001', str)
 
 // redisCli.set('CMD_6660000000000001', JSON.stringify({
 //     'machineId': '6660000000000001',

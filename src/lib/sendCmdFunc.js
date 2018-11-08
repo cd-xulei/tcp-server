@@ -50,10 +50,11 @@ async function writeConfig (resBuffer, params) {
     const frameId = await buildFrameId()
     buffer.writeUInt8(frameId, 0)
     buffer.writeUInt8(0x02, 1)
-    buffer.writeUInt8(236, 2)
+    buffer.writeUInt8(233, 2)
     buffer.writeInt16BE(0, 3)
-    buffer.writeUInt8(233, 5)
+    buffer.writeUInt8(230, 5)
     const configBuffer = configTem.buildConfigBuffer(params)
+    console.log(configBuffer.toString('hex'))
     const prefix = resBuffer.slice(0, 32)
 
     const res = Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)

@@ -53,11 +53,12 @@ function buildConfigBuffer (json) {
         return count
     }, 0)
     const configBuffer = Buffer.alloc(len)
-    logger.info('写配置长度', len, configBuffer)
+    logger.info('写配置长度', len)
+    console.log(configBuffer.toString('hex'))
     if (_.isEmpty(json)) return configBuffer
     _.forEach(tem, (val, key) => {
         if (json[key]) {
-            configBuffer.write(json[key], val.startAt, val.len, 'ascii')
+            configBuffer.write((json[key] || '').trim(), val.startAt, val.len, 'ascii')
         }
     })
     return configBuffer
