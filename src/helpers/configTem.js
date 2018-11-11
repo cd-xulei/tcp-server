@@ -47,21 +47,42 @@ const tem = {
     }
 }
 
-function buildConfigBuffer (json) {
-    const len = _.reduce(tem, (count, val) => {
-        count += val.len
+const fields = ['machineId', 'hardwareInfo', 'protocol', 'ip', 'remotePort', 'localPort', 'wifi', 'wifiSecretType', 'wifiPass', 'apn']
+
+function buildConfigBuffer (json, frameId) {
+    const targets = fields.reduce((res, val) => {
+        if (json[val]) {
+            res.push(val)
+        }
+        return res
+    }, [])
+    const current = {index: 0}
+    const len = _.reduce(targets, (count, val) => {
+        count += tem[val].len || 0
         return count
     }, 0)
-    const configBuffer = Buffer.alloc(len)
+
+    if (_.isEmpty(targets)) {
+        logger.error('后台写配置有误!')
+        return
+    }
+
     logger.info('写配置长度', len)
-    console.log(configBuffer.toString('hex'))
-    if (_.isEmpty(json)) return configBuffer
-    _.forEach(tem, (val, key) => {
-        if (json[key]) {
-            configBuffer.write((json[key] || '').trim(), val.startAt, val.len, 'ascii')
-        }
+    const buffer = Buffer.alloc(3 + 3)
+    buffer.writeUInt8(frameId, 0)
+    buffer.writeUInt8(0x02, 1)
+    buffer.writeUInt8(len + 3, 2)
+    buffer.writeInt16BE(tem[targets[0]].startAt, 3)
+    buffer.writeUInt8(len, 5)
+
+    const configBuffer = Buffer.alloc(len)
+    targets.forEach(field => {
+        const mark = tem[field]
+        configBuffer.write((json[field] || '').trim(), current.index, mark.len, 'ascii')
+        current.index += mark.len
     })
-    return configBuffer
+
+    return Buffer.concat([buffer, configBuffer], buffer.length + configBuffer.length)
 }
 
 module.exports = {

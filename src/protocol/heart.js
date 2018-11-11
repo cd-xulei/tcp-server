@@ -8,10 +8,7 @@ const logger = require('../helpers/logger.js').getLogger('heart')
 const hashFunc = require('../helpers/hashFunc.js')
 
 const _ = require('lodash')
-const dataFunc = require('../lib/sendCmdFunc.js')
 const redisCli = require('../helpers/redis.js')
-
-const readcmd = require('../db/readcmd.js')
 
 // 设备的三种状态
 let MachineType = {}

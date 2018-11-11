@@ -46,18 +46,12 @@ async function readConfig (resBuffer) {
 
 // 0x02 写配置命令
 async function writeConfig (resBuffer, params) {
-    const buffer = Buffer.alloc(3 + 3)
     const frameId = await buildFrameId()
-    buffer.writeUInt8(frameId, 0)
-    buffer.writeUInt8(0x02, 1)
-    buffer.writeUInt8(233, 2)
-    buffer.writeInt16BE(0, 3)
-    buffer.writeUInt8(230, 5)
-    const configBuffer = configTem.buildConfigBuffer(params)
-    console.log(configBuffer.toString('hex'))
+
+    const configBuffer = configTem.buildConfigBuffer(params, frameId)
     const prefix = resBuffer.slice(0, 32)
 
-    const res = Buffer.concat([prefix, buffer, configBuffer], prefix.length + buffer.length + configBuffer.length)
+    const res = Buffer.concat([prefix, configBuffer], prefix.length + configBuffer.length)
     return res
 }
 
