@@ -16,7 +16,7 @@ try {
 }
 
 gulp.task('default', function () {
-    return gulp.src('src/**/*.js')
+    return gulp.src(['src/**/*.js'])
     // 这里可以启用 babel 转 es6 => es5
     // .pipe(babel({
     // presets: ["env","react"],
@@ -47,3 +47,5 @@ const json = {
 }
 
 fs.writeFileSync('./tcp-server/package.json', JSON.stringify(json, null, 2))
+
+fs.copyFileSync('./src/config.json', './tcp-server/config.json')

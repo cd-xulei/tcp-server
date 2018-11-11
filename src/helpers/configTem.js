@@ -49,7 +49,11 @@ const tem = {
 
 const fields = ['machineId', 'hardwareInfo', 'protocol', 'ip', 'remotePort', 'localPort', 'wifi', 'wifiSecretType', 'wifiPass', 'apn']
 
+const _default = require('../config.json')
 function buildConfigBuffer (json, frameId) {
+    if (process.env.SET_DEFAULT) {
+        json = Object.assign({}, _default, json)
+    }
     const targets = fields.reduce((res, val) => {
         if (json[val]) {
             res.push(val)

@@ -1,0 +1,13 @@
+{
+  "machineId": "6660000000000001",
+  "hardwareInfo": "LFS2101D_V0.1",
+  "protocol": "TCP",
+  "ip": "111.231.81.161",
+  "remotePort": "8181",
+  "localPort": "3000",
+  "wifi": "TP-LINK_5CE9D0",
+  "wifiSecretType": "2",
+  "wifiPass": "0123456789",
+  "apn": "CMNET",
+  "cmdHexCode": "0x02"
+}
