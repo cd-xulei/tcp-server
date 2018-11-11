@@ -4,7 +4,7 @@ const _ = require('lodash')
 
 const logger = require('log4js').getLogger()
 const tem = {
-    machineId: {
+    deviceId: {
         len: 17,
         startAt: 0
     },
@@ -28,15 +28,15 @@ const tem = {
         len: 6,
         startAt: 60
     },
-    wifi: {
+    wifiName: {
         len: 33,
         startAt: 66
     },
-    wifiSecretType: {
+    wifiType: {
         len: 2,
         startAt: 99
     },
-    wifiPass: {
+    wifiPassword: {
         len: 64,
         startAt: 101
     },
@@ -47,7 +47,7 @@ const tem = {
     }
 }
 
-const fields = ['machineId', 'hardwareInfo', 'protocol', 'ip', 'remotePort', 'localPort', 'wifi', 'wifiSecretType', 'wifiPass', 'apn']
+const fields = ['deviceId', 'hardwareInfo', 'protocol', 'ip', 'remotePort', 'localPort', 'wifiName', 'wifiType', 'wifiPassword', 'apn']
 
 const _default = require('../config.json')
 function buildConfigBuffer (json, frameId) {

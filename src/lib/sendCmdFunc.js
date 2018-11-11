@@ -39,7 +39,7 @@ async function readConfig (resBuffer) {
     buffer.writeInt16LE(3, 2)
 
     buffer.writeInt16LE(0, 3)
-    buffer.writeInt16LE(233, 5)
+    buffer.writeInt16LE(230, 5)
     const prefix = resBuffer.slice(0, 32)
     return Buffer.concat([prefix, buffer], prefix.length + buffer.length)
 }
@@ -51,6 +51,8 @@ async function writeConfig (resBuffer, params) {
     const configBuffer = configTem.buildConfigBuffer(params, frameId)
     const prefix = resBuffer.slice(0, 32)
 
+    await redisCli.set(`${params.deviceId}_logId`, params.logId)
+    logger.info(`设置 ${params.deviceId}_logId`, params.logId)
     const res = Buffer.concat([prefix, configBuffer], prefix.length + configBuffer.length)
     return res
 }

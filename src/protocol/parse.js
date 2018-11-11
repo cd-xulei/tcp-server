@@ -12,7 +12,7 @@ const handler = {
         logger.debug('收到终端回复 0x00')
         if (!params.operateResult) {
             logger.info('复位 操作成功!')
-            redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode operateResult')))
+            redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId')))
         } else {
             logger.error('复位 操作失败!')
         }
@@ -22,17 +22,18 @@ const handler = {
         const configBuffer = rawBuffer.slice(36)
 
         let data = {
-            machineId: configBuffer.toString('ascii', 0, 17),
+            deviceId: configBuffer.toString('ascii', 0, 17),
             hardwareInfo: configBuffer.toString('ascii', 17, 34),
             protocol: configBuffer.toString('ascii', 34, 38),
             ip: configBuffer.toString('ascii', 38, 54),
             remotePort: configBuffer.toString('ascii', 54, 60),
             localPort: configBuffer.toString('ascii', 60, 66),
-            wifi: configBuffer.toString('ascii', 66, 99),
-            wifiSecretType: configBuffer.toString('ascii', 99, 101),
-            wifiPass: configBuffer.toString('ascii', 101, 165),
+            wifiName: configBuffer.toString('ascii', 66, 99),
+            wifiType: configBuffer.toString('ascii', 99, 101),
+            wifiPassword: configBuffer.toString('ascii', 101, 165),
             apn: configBuffer.toString('ascii', 165, 230),
             cmdCode: '0x01',
+            logId: params.logId,
             msg: '读到设备的配置信息,写配置时,请保持与当前json一样的结构'
         }
         logger.info('0x01 解回复数据', JSON.stringify(data))
@@ -41,7 +42,7 @@ const handler = {
     },
     // 写配置命令
     '0x02': params => {
-        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode operateResult')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId')))
         if (!params.operateResult) {
             logger.info('改配置成功!')
         }
@@ -60,13 +61,13 @@ const handler = {
             }
         }
         redisCli.publish(channel, JSON.stringify({
-            ...only(params, 'machineId cmdHexCode operateResult'),
+            ...only(params, 'deviceId cmdCode operateResult logId'),
             data
         }))
     },
     // 清除复位命令
     '0x0B': params => {
-        redisCli.publish(channel, JSON.stringify(only(params, 'machineId cmdHexCode operateResult')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId')))
     },
     // 读到的电压值
     '0x09': (params, rawBuffer) => {
@@ -74,7 +75,7 @@ const handler = {
             voltage: rawBuffer.readUInt16BE(36)
         }
         redisCli.publish(channel, JSON.stringify({
-            ...only(params, 'machineId cmdHexCode operateResult'),
+            ...only(params, 'deviceId cmdCode operateResult logId'),
             data
         }))
     }
@@ -85,7 +86,7 @@ module.exports = async function (rawBuffer) {
         // 头
         beginSign: rawBuffer.toString('hex', 0, 2),
         // 设备id
-        machineId: rawBuffer.toString('ascii', 2, 18),
+        deviceId: rawBuffer.toString('ascii', 2, 18),
         // 随机值
         random: rawBuffer.readUInt32LE(18),
         // 固定版本
@@ -103,17 +104,18 @@ module.exports = async function (rawBuffer) {
     }
     // 命令帧
     if (rawBuffer.length >= 32 && params.frameType === 1) {
+        const logId = await redisCli.get(`${params.deviceId}_logId`)
         Object.assign(params, {
         // 帧号
             frameNum: rawBuffer.readUInt8(32),
             // cmd
-            cmdCode: rawBuffer.readUInt8(33),
-            cmdHexCode: '0x' + rawBuffer.toString('hex', 33, 34).toUpperCase(),
+            cmdCode: '0x' + rawBuffer.toString('hex', 33, 34).toUpperCase(),
             // status 接收状态
             operateResult: rawBuffer.readUInt8(34),
-            payloadLen: rawBuffer.readUInt8(35)
+            payloadLen: rawBuffer.readUInt8(35),
+            logId
         })
         logger.debug('终端回复数据', JSON.stringify(params))
     }
-    return handler[params.cmdHexCode] ? handler[params.cmdHexCode](params, rawBuffer) : params
+    return handler[params.cmdCode] ? handler[params.cmdCode](params, rawBuffer) : params
 }

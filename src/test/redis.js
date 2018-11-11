@@ -11,21 +11,21 @@ const redisCli = new Redis({
 })
 
 const str = JSON.stringify({
-    'machineId': '6660000000000001',
+    'deviceId': '6660000000000001',
     // 'hardwareInfo': 'LFS2101D_V0.1',
     // 'protocol': 'TCP',
     // 'ip': '47.106.193.158',
     // 'remotePort': '8181',
     // 'localPort': '3000',
-    'wifi': 'TP-LINK_5CE9D0',
-    'wifiSecretType': '2',
-    'wifiPass': '0123456789',
+    'wifiName': 'TP-LINK_5CE9D0',
+    'wifiType': '2',
+    'wifiPassword': '0123456789',
     // 'apn': 'CMNET',
-    'cmdHexCode': '0x02'
+    'cmdCode': '0x02'
 })
 redisCli.set('CMD_6660000000000001', str)
 
 // redisCli.set('CMD_6660000000000001', JSON.stringify({
-//     'machineId': '6660000000000001',
-//     'cmdHexCode': '0x01'
+//     'deviceId': '6660000000000001',
+//     'cmdCode': '0x01'
 // }))
