@@ -22,10 +22,11 @@ module.exports = async function (params) {
     } catch (err) {
         logger.error('后端向redis中写命令 格式出错', err.message)
     }
-    // await redisCli.del(`CMD_${deviceId}`)
+    await redisCli.del(`CMD_${deviceId}`)
     // 根据命令码写命令包
     if (sendCmdFunc[cmd.cmdCode]) {
         // 改为命令帧
+        Object.assign(cmd, {deviceId})
         resBuffer.writeInt8(0x01, 31)
         resBuffer = await sendCmdFunc[cmd.cmdCode](resBuffer, cmd)
         // 加签名
