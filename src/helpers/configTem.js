@@ -53,6 +53,8 @@ const _default = require('../config.json')
 function buildConfigBuffer (json, frameId) {
     if (process.env.SET_DEFAULT) {
         json = Object.assign({}, _default, json)
+    } else {
+        json = _.omit(json, ['cmdCode', 'deviceId'])
     }
     const targets = fields.reduce((res, val) => {
         if (json[val]) {
