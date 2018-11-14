@@ -14,6 +14,7 @@ let MachineType = {}
 MachineType[MachineType['MachineTypeNormal'] = 1] = 'MachineTypeNormal'
 MachineType[MachineType['MachineTypeDirect'] = 2] = 'MachineTypeDirect'
 MachineType[MachineType['MachineTypeTurnover'] = 3] = 'MachineTypeTurnover'
+MachineType[MachineType['MachineTypeClose'] = 4] = 'MachineTypeClose'
 
 module.exports = async function heartHandler (params) {
     const { beginSign, machineId, random, version, speed, wifi, mobileData, flag, frameType } = params
@@ -89,6 +90,9 @@ module.exports = async function heartHandler (params) {
     }
 
     let closeTime = mType === MachineType.MachineTypeDirect ? nowTime + 300 : activitedTime
+    if (mType === 4) {
+        closeTime = 0
+    }
     logger.debug('关闭时间:', closeTime)
     resBuffer.writeUInt32LE(closeTime, 26)
 
