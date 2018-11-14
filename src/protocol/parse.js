@@ -12,8 +12,9 @@ const handler = {
         logger.debug('收到终端回复 0x00')
         if (!params.operateResult) {
             logger.info('复位 操作成功!')
-            redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId')))
+            redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId onlineTime')))
         } else {
+            redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId onlineTime')))
             logger.error('复位 操作失败!')
         }
     },
@@ -34,7 +35,7 @@ const handler = {
             apn: configBuffer.toString('ascii', 165, 230),
             cmdCode: '0x01',
             logId: params.logId,
-            msg: '读到设备的配置信息,写配置时,请保持与当前json一样的结构'
+            onlineTime: params.onlineTime
         }
         logger.info('0x01 解回复数据', JSON.stringify(data))
         redisCli.publish(channel, JSON.stringify(data))
@@ -42,7 +43,7 @@ const handler = {
     },
     // 写配置命令
     '0x02': params => {
-        redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId')))
+        redisCli.publish(channel, JSON.stringify(only(params, 'deviceId cmdCode operateResult logId onlineTime')))
         if (!params.operateResult) {
             logger.info('改配置成功!')
         }
@@ -105,6 +106,8 @@ module.exports = async function (rawBuffer) {
     // 命令帧
     if (rawBuffer.length >= 32 && params.frameType === 1) {
         const logId = await redisCli.get(`${params.deviceId}_logId`)
+        const onlineTime = await redisCli.get(`${params.deviceId}_onlineTime`)
+
         Object.assign(params, {
         // 帧号
             frameNum: rawBuffer.readUInt8(32),
@@ -113,9 +116,11 @@ module.exports = async function (rawBuffer) {
             // status 接收状态
             operateResult: rawBuffer.readUInt8(34),
             payloadLen: rawBuffer.readUInt8(35),
-            logId
+            logId,
+            onlineTime
         })
         logger.debug('终端回复数据', JSON.stringify(params))
     }
+
     return handler[params.cmdCode] ? handler[params.cmdCode](params, rawBuffer) : params
 }

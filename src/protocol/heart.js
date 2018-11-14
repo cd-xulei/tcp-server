@@ -89,6 +89,15 @@ module.exports = async function heartHandler (params) {
     } else {
         await redisCli.del(`${deviceId}_lastUse`)
     }
+    const UP_TIME_KEY = `${deviceId}_upTime`
+    let upTime = await redisCli.get(UP_TIME_KEY)
+    if (!upTime) {
+        await redisCli.set(UP_TIME_KEY, Date.now())
+    } else {
+        const onlineTime = Date.now() - Number(upTime)
+        await redisCli.set(`${deviceId}_onlineTime`, onlineTime)
+        await redisCli.expire(UP_TIME_KEY, 60)
+    }
 
     let closeTime = mType === MachineType.MachineTypeDirect ? nowTime + 300 : activitedTime
     if (mType === 4) {
