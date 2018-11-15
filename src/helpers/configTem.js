@@ -83,8 +83,9 @@ function buildConfigBuffer (json, frameId) {
 
     const configBuffer = Buffer.alloc(len)
     targets.forEach(field => {
+        const encode = field === 'wifiName' ? 'utf8' : 'ascii'
         const mark = tem[field]
-        configBuffer.write((json[field] || '').trim(), current.index, mark.len, 'ascii')
+        configBuffer.write((json[field] || '').trim(), current.index, mark.len, encode)
         current.index += mark.len
     })
 

@@ -29,7 +29,7 @@ const handler = {
             ip: configBuffer.toString('ascii', 38, 54),
             remotePort: configBuffer.toString('ascii', 54, 60),
             localPort: configBuffer.toString('ascii', 60, 66),
-            wifiName: configBuffer.toString('ascii', 66, 99),
+            wifiName: configBuffer.toString('utf8', 66, 99),
             wifiType: configBuffer.toString('ascii', 99, 101),
             wifiPassword: configBuffer.toString('ascii', 101, 165),
             apn: configBuffer.toString('ascii', 165, 230),

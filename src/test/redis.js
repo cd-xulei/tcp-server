@@ -17,7 +17,7 @@ const str = JSON.stringify({
     // 'ip': '47.106.193.158',
     // 'remotePort': '8181',
     // 'localPort': '3000',
-    'wifiName': 'TP-LINK_5CE9D0',
+    'wifiName': '缘客来9-10-11',
     'wifiType': '2',
     'wifiPassword': '0123456789',
     // 'apn': 'CMNET',
